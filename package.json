@@ -7,7 +7,11 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "db:setup": "node ./sql/run.js",
-    "lint": "eslint ."
+    "migrate": "dotenv -e .env -- node-pg-migrate up -m ./migrations",
+    "migrate:down": "dotenv -e .env -- node-pg-migrate down -m ./migrations",
+    "migrate:reset": "dotenv -e .env -- node-pg-migrate reset -m ./migrations",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "keywords": [],
   "author": "",
@@ -20,10 +24,12 @@
     "bcrypt": "^6.0.0",
     "dotenv": "^17.2.2",
     "joi": "^18.0.1",
+    "node-pg-migrate": "^8.0.3",
     "pg": "^8.16.3",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
+    "dotenv-cli": "^10.0.0",
     "eslint": "^8.57.1",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.32.0",

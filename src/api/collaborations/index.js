@@ -1,8 +1,8 @@
-import routes from "./routes.js";
-import CollaborationsHandler from "./handler.js";
+import routes from './routes.js'
+import CollaborationsHandler from './handler.js'
 
 export default {
-  name: "collaborations",
+  name: 'collaborations',
   register: async (
     server,
     { playlistsService, usersService, collaborationsService, validator }
@@ -12,7 +12,7 @@ export default {
       usersService,
       collaborationsService,
       validator
-    );
-    server.route(routes(handler));
-  },
-};
+    )
+    server.route(routes(handler))
+  }
+}

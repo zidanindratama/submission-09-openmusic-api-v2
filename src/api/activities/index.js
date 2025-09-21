@@ -1,10 +1,10 @@
-import routes from "./routes.js";
-import ActivitiesHandler from "./handler.js";
+import routes from './routes.js'
+import ActivitiesHandler from './handler.js'
 
 export default {
-  name: "activities",
+  name: 'activities',
   register: async (server, { playlistsService, activitiesService }) => {
-    const handler = new ActivitiesHandler(playlistsService, activitiesService);
-    server.route(routes(handler));
-  },
-};
+    const handler = new ActivitiesHandler(playlistsService, activitiesService)
+    server.route(routes(handler))
+  }
+}

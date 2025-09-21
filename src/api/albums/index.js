@@ -1,10 +1,10 @@
-import routes from "./routes.js";
-import AlbumsHandler from "./handler.js";
+import routes from './routes.js'
+import AlbumsHandler from './handler.js'
 
 export default {
-  name: "albums",
+  name: 'albums',
   register: async (server, { service, validator }) => {
-    const handler = new AlbumsHandler(service, validator);
-    server.route(routes(handler));
-  },
-};
+    const handler = new AlbumsHandler(service, validator)
+    server.route(routes(handler))
+  }
+}

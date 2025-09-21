@@ -1,8 +1,8 @@
-import routes from "./routes.js";
-import AuthenticationsHandler from "./handler.js";
+import routes from './routes.js'
+import AuthenticationsHandler from './handler.js'
 
 export default {
-  name: "authentications",
+  name: 'authentications',
   register: async (
     server,
     { usersService, authService, tokenManager, validator }
@@ -12,7 +12,7 @@ export default {
       authService,
       tokenManager,
       validator
-    );
-    server.route(routes(handler));
-  },
-};
+    )
+    server.route(routes(handler))
+  }
+}

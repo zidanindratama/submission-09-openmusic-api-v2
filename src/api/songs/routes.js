@@ -1,33 +1,33 @@
 const routes = (handler) => [
   {
-    method: "POST",
-    path: "/songs",
+    method: 'POST',
+    path: '/songs',
     handler: (r, h) => handler.postSong(r, h),
-    options: { auth: false },
+    options: { auth: false }
   },
   {
-    method: "GET",
-    path: "/songs",
+    method: 'GET',
+    path: '/songs',
     handler: (r) => handler.getSongs(r),
-    options: { auth: false },
+    options: { auth: false }
   },
   {
-    method: "GET",
-    path: "/songs/{id}",
+    method: 'GET',
+    path: '/songs/{id}',
     handler: (r) => handler.getSongById(r),
-    options: { auth: false },
+    options: { auth: false }
   },
   {
-    method: "PUT",
-    path: "/songs/{id}",
+    method: 'PUT',
+    path: '/songs/{id}',
     handler: (r) => handler.putSongById(r),
-    options: { auth: false },
+    options: { auth: false }
   },
   {
-    method: "DELETE",
-    path: "/songs/{id}",
+    method: 'DELETE',
+    path: '/songs/{id}',
     handler: (r) => handler.deleteSongById(r),
-    options: { auth: false },
-  },
-];
-export default routes;
+    options: { auth: false }
+  }
+]
+export default routes

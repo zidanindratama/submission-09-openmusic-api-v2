@@ -1,8 +1,17 @@
 # 🎵 OpenMusic API v2 (Hapi + PostgreSQL)
 
-Proyek ini adalah **RESTful API** untuk mengelola **album**, **lagu**, serta fitur **playlist** (private) dengan **autentikasi JWT**.
+Proyek ini adalah **RESTful API** untuk mengelola **album**, **lagu**, serta fitur **playlist** (private) dengan **autentikasi JWT**.  
 Dibangun menggunakan **Node.js (ESM)**, **Hapi**, dan **PostgreSQL**.
-API disusun mengikuti kriteria submission **OpenMusic V2** (Registrasi & Auth, Playlist restrict, Foreign Key, Data Validation, Error Handling) + opsi **Kolaborasi** dan **Playlist Activities**.
+
+API ini disusun untuk memenuhi kriteria submission **OpenMusic V2**:
+
+- Registrasi & Autentikasi JWT
+- Playlist privat (restricted access)
+- Relasi via Foreign Key
+- Data Validation dengan Joi
+- Error Handling terpusat
+
+* **Opsional**: Kolaborasi Playlist & Playlist Activities.
 
 ---
 
@@ -30,60 +39,51 @@ ACCESS_TOKEN_AGE=3600
 
 > **Catatan**
 >
-> - Pastikan database `openmusicv2` sudah ada:
->
+> - Pastikan database sudah ada:
 >   ```sql
 >   CREATE DATABASE openmusicv2;
 >   ```
->
-> - `ACCESS_TOKEN_KEY` dan `REFRESH_TOKEN_KEY` **wajib** diisi & konsisten (digunakan untuk sign access/refresh token).
+> - Ganti `ACCESS_TOKEN_KEY` dan `REFRESH_TOKEN_KEY` dengan nilai rahasia.
 
 ---
 
 ## ✨ Fitur Utama
 
-- **Kriteria 1 – Registrasi & Autentikasi**
+### 1. Registrasi & Autentikasi
 
-  - `POST /users` — registrasi (username unik).
-  - `POST /authentications` — login, mengembalikan **accessToken** & **refreshToken**.
-  - `PUT /authentications` — refresh **accessToken** menggunakan **refreshToken**.
-  - `DELETE /authentications` — logout, hapus **refreshToken** dari DB.
-  - Format token: **JWT** berisi payload `{ userId }`.
+- `POST /users` → registrasi user baru
+- `POST /authentications` → login, kembalikan accessToken & refreshToken
+- `PUT /authentications` → perbarui accessToken dengan refreshToken
+- `DELETE /authentications` → logout (hapus refreshToken dari DB)
 
-- **Kriteria 2 – Playlist (Restricted)**
+### 2. Playlist (Restricted Access)
 
-  - `POST /playlists`, `GET /playlists`, `DELETE /playlists/{id}`.
-  - `POST /playlists/{id}/songs`, `GET /playlists/{id}/songs`, `DELETE /playlists/{id}/songs`.
-  - Hanya **pemilik** (atau **kolaborator**) yang bisa mengelola playlist.
-  - Response sesuai spesifikasi (lihat contoh di bawah).
+- `POST /playlists`, `GET /playlists`, `DELETE /playlists/{id}`
+- `POST /playlists/{id}/songs`, `GET /playlists/{id}/songs`, `DELETE /playlists/{id}/songs`
+- Hanya pemilik (atau kolaborator) yang bisa akses playlist.
 
-- **Kriteria 3 – Foreign Key**
+### 3. Albums & Songs (Public)
 
-  - Relasi: `songs → albums`, `playlists → users`, `playlist_songs → (playlists, songs)`, dll.
+- CRUD Albums
+- CRUD Songs + filter query `?title=...&performer=...`
+- Album detail menampilkan daftar lagu di dalamnya
 
-- **Kriteria 4 – Data Validation (Joi)**
+### 4. Validasi Data (Joi)
 
-  - Validasi payload untuk Users, Authentications, Playlists, Playlist-Songs, Albums, Songs.
+- Semua payload (users, auth, albums, songs, playlists, collabs, dsb) tervalidasi.
 
-- **Kriteria 5 – Error Handling**
+### 5. Error Handling
 
-  - `400 Bad Request` → payload invalid.
-  - `401 Unauthorized` → tanpa access token pada resource restricted.
-  - `403 Forbidden` → akses bukan miliknya.
-  - `404 Not Found` → resource tak ditemukan.
-  - `500 Internal Server Error` → error server.
-  - Penanganan terpusat via **onPreResponse**.
+- `400` → payload invalid
+- `401` → token hilang/invalid
+- `403` → akses dilarang (bukan owner/kolaborator)
+- `404` → resource tidak ditemukan
+- `500` → error server internal
 
-- **Kriteria 6 – Pertahankan V1**
+### 6. Opsional
 
-  - CRUD **Albums** & **Songs** (public).
-  - `GET /songs?title=...&performer=...` (query filter).
-  - Detail album menampilkan daftar lagu di album.
-
-- **Kriteria Opsional**
-
-  - **Kolaborasi**: `POST/DELETE /collaborations` → tambah/hapus kolaborator playlist.
-  - **Playlist Activities**: `GET /playlists/{id}/activities` → riwayat tambah/hapus lagu di playlist.
+- Kolaborasi: `POST/DELETE /collaborations`
+- Playlist Activities: `GET /playlists/{id}/activities`
 
 ---
 
@@ -93,45 +93,36 @@ ACCESS_TOKEN_AGE=3600
 submission-09-openmusic-api-v2/
 ├─ .env.example
 ├─ .eslintrc.cjs
+├─ migrations/                # migration files (node-pg-migrate)
+│   └─ 001_init.cjs
 ├─ src/
 │  ├─ server.js
 │  ├─ container.js
 │  ├─ exceptions/
-│  │   ├─ ClientError.js
-│  │   ├─ InvariantError.js
-│  │   ├─ AuthenticationError.js
-│  │   ├─ AuthorizationError.js
-│  │   └─ NotFoundError.js
-│  ├─ tokenize/TokenManager.js
-│  ├─ utils/mapDBToModel.js
 │  ├─ api/
-│  │   ├─ albums/ (public)
-│  │   ├─ songs/  (public)
-│  │   ├─ users/  (public)
-│  │   ├─ authentications/ (public)
-│  │   ├─ playlists/ (auth: openmusic_jwt)
-│  │   ├─ collaborations/ (auth: openmusic_jwt)   # opsional
-│  │   └─ activities/    (auth: openmusic_jwt)   # opsional
+│  │   ├─ albums/
+│  │   ├─ songs/
+│  │   ├─ users/
+│  │   ├─ authentications/
+│  │   ├─ playlists/
+│  │   ├─ collaborations/     # opsional
+│  │   └─ activities/         # opsional
 │  ├─ services/postgres/
 │  └─ validator/
-├─ sql/
-│  ├─ 001_init.sql
-│  └─ run.js
 └─ package.json
 ```
-
-> **Catatan**: Endpoint **albums** dan **songs** sengaja dibuat **public** (`auth:false`) karena pengujian mengaksesnya tanpa token.
 
 ---
 
 ## 🧰 Teknologi
 
-- **Node.js** (LTS ≥ 18)
-- **@hapi/hapi**, **@hapi/jwt**
-- **pg** (PostgreSQL)
-- **Joi** (validasi)
-- **dotenv**, **auto-bind**
-- **ESLint (standard)**, **nodemon**
+- Node.js LTS (≥18)
+- @hapi/hapi, @hapi/jwt
+- pg (PostgreSQL driver)
+- Joi (validasi schema)
+- dotenv, auto-bind
+- node-pg-migrate (migration DB)
+- ESLint (standard), nodemon
 
 ---
 
@@ -146,17 +137,17 @@ submission-09-openmusic-api-v2/
 2. **Setup database**
 
    - Buat DB `openmusicv2`.
-   - Salin `.env.example` → `.env`, sesuaikan kredensial.
+   - Copy `.env.example` → `.env`, sesuaikan dengan kredensial lokal.
 
-3. **Init schema**
+3. **Jalankan migrasi schema**
 
    ```bash
-   npm run db:setup
+   npm run migrate
    ```
 
-   (menjalankan `sql/001_init.sql`)
+   (Menggunakan `node-pg-migrate` & folder `migrations/`)
 
-4. **Development (auto-reload)**
+4. **Development**
 
    ```bash
    npm run dev
@@ -164,17 +155,9 @@ submission-09-openmusic-api-v2/
    ```
 
 5. **Production**
-
    ```bash
    npm start
    ```
-
-> **Scripts** (dari `package.json`):
->
-> - `dev` → nodemon `src/server.js`
-> - `start` → node `src/server.js`
-> - `db:setup` → jalankan migrasi SQL sederhana
-> - `lint` → ESLint (standard)
 
 ---
 
@@ -184,25 +167,31 @@ submission-09-openmusic-api-v2/
 
   - `POST /authentications`
   - Body: `{ "username": "dicoding", "password": "secret" }`
-  - `201` → `{ "status":"success", "data": { "accessToken":"...", "refreshToken":"..." } }`
+  - Respon:
+    ```json
+    {
+      "status": "success",
+      "data": {
+        "accessToken": "...",
+        "refreshToken": "..."
+      }
+    }
+    ```
 
 - **Gunakan Access Token**
 
   - Header: `Authorization: Bearer <accessToken>`
-  - Diperlukan untuk semua endpoint **/playlists**, **/collaborations**, **/playlists/{id}/activities**.
 
 - **Refresh Token**
 
   - `PUT /authentications` → body `{ "refreshToken": "..." }`
-  - `200` → `{ "status":"success", "data": { "accessToken":"..." } }`
 
 - **Logout**
-
   - `DELETE /authentications` → hapus refresh token dari DB.
 
 ---
 
-## 📡 Contoh Respons Penting
+## 📡 Contoh Respons
 
 ### GET /playlists
 
@@ -211,11 +200,7 @@ submission-09-openmusic-api-v2/
   "status": "success",
   "data": {
     "playlists": [
-      {
-        "id": "playlist-123",
-        "name": "Lagu Indie Hits Indonesia",
-        "username": "dicoding"
-      }
+      { "id": "playlist-123", "name": "Lagu Indie", "username": "dicoding" }
     ]
   }
 }
@@ -243,7 +228,7 @@ submission-09-openmusic-api-v2/
 }
 ```
 
-### GET /playlists/{id}/activities _(opsional)_
+### GET /playlists/{id}/activities
 
 ```json
 {
@@ -266,26 +251,30 @@ submission-09-openmusic-api-v2/
 
 ## 🧪 Pengujian dengan Postman
 
-1. Import **collection** dan **environment** Postman (V2) ke aplikasi Postman.
-2. Set `{{port}} = 5000` (atau sesuai `.env`).
-3. Jalankan folder secara **berurutan**:
-
-   1. **Users** → 2) **Authentications** → 3) **Albums** → 4) **Songs** → 5) **Playlists** → (opsional) **Collaborations** & **Activities**.
-
-4. Jika terjadi kegagalan karena data “kotor”, kosongkan tabel:
-
+1. Import collection & environment (v2) ke Postman.
+2. Set variable `{{port}} = 5000`.
+3. Jalankan urutan:
+   1. Users
+   2. Authentications
+   3. Albums
+   4. Songs
+   5. Playlists
+   6. (Opsional) Collaborations & Activities
+4. Jika data kotor, kosongkan tabel:
    ```sql
-   TRUNCATE albums, songs, users, authentications, playlists, playlist_songs, playlist_song_activities, collaborations RESTART IDENTITY CASCADE;
+   TRUNCATE albums, songs, users, authentications, playlists,
+   playlist_songs, playlist_song_activities, collaborations
+   RESTART IDENTITY CASCADE;
    ```
 
 ---
 
-## 🐛 Error Handling (Ringkas)
+## 🐛 Error Handling Ringkas
 
-| Kondisi                                 | Kode | Body                                    |
-| --------------------------------------- | ---- | --------------------------------------- |
-| Payload tidak valid                     | 400  | `{ "status":"fail", "message":"..." }`  |
-| Token hilang/invalid (akses restricted) | 401  | `{ "status":"fail", "message":"..." }`  |
-| Akses bukan milik/kolaborator           | 403  | `{ "status":"fail", "message":"..." }`  |
-| Resource tidak ditemukan (id salah)     | 404  | `{ "status":"fail", "message":"..." }`  |
-| Error server                            | 500  | `{ "status":"error", "message":"..." }` |
+| Kondisi                       | Kode | Body                                   |
+| ----------------------------- | ---- | -------------------------------------- |
+| Payload tidak valid           | 400  | `{ "status":"fail","message":"..." }`  |
+| Token hilang/invalid          | 401  | `{ "status":"fail","message":"..." }`  |
+| Akses bukan owner/kolaborator | 403  | `{ "status":"fail","message":"..." }`  |
+| Resource tidak ditemukan      | 404  | `{ "status":"fail","message":"..." }`  |
+| Error server                  | 500  | `{ "status":"error","message":"..." }` |

@@ -1,8 +1,8 @@
-import routes from "./routes.js";
-import PlaylistsHandler from "./handler.js";
+import routes from './routes.js'
+import PlaylistsHandler from './handler.js'
 
 export default {
-  name: "playlists",
+  name: 'playlists',
   register: async (
     server,
     { playlistsService, songsService, validator, activitiesService }
@@ -12,7 +12,7 @@ export default {
       songsService,
       validator,
       activitiesService
-    );
-    server.route(routes(handler));
-  },
-};
+    )
+    server.route(routes(handler))
+  }
+}

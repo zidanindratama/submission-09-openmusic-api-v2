@@ -1,10 +1,10 @@
-import routes from "./routes.js";
-import UsersHandler from "./handler.js";
+import routes from './routes.js'
+import UsersHandler from './handler.js'
 
 export default {
-  name: "users",
+  name: 'users',
   register: async (server, { service, validator }) => {
-    const handler = new UsersHandler(service, validator);
-    server.route(routes(handler));
-  },
-};
+    const handler = new UsersHandler(service, validator)
+    server.route(routes(handler))
+  }
+}
