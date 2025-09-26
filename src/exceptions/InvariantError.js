@@ -1,7 +1,7 @@
-import ClientError from './ClientError.js'
+import ClientError from "./ClientError.js";
 
 export default class InvariantError extends ClientError {
-  constructor (message) {
-    super(message, 400)
+  constructor(message) {
+    super(message, 400);
   }
 }
